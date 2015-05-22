@@ -34,12 +34,14 @@ The route is given a name derived from the section name. In this case "homepage"
   >>> from aio.app.runner import runner    
   >>> from aio.testing import aiofuturetest
 
-  >>> def handler(request):
+  >>> @asyncio.coroutine
+  ... def handler(request):
   ...     return aiohttp.web.Response(body=b"Hello, web world")    
 
-  >>> aio.web.server.tests._example_handler = asyncio.coroutine(handler)
-  
-  >>> def run_web_server(config, request_page="http://localhost:7070"):
+  >>> aio.web.server.tests._example_handler = handler
+
+  >>> @aiofuturetest(sleep=1)
+  ... def run_web_server(config, request_page="http://localhost:7070"):
   ...     yield from runner(['run'], config_string=config)
   ... 
   ...     @asyncio.coroutine
@@ -52,7 +54,7 @@ The route is given a name derived from the section name. In this case "homepage"
   ... 
   ...     return call_web_server
 
-  >>> aiofuturetest(run_web_server, sleep=1)(web_server_config)  
+  >>> run_web_server(web_server_config)  
   Hello, web world
 
   
@@ -98,12 +100,14 @@ The "web/" section takes a static_url and a static_dir option for hosting static
 
   >>> import os
   >>> import tempfile
+
   >>> with tempfile.TemporaryDirectory() as tmp:
   ...     with open(os.path.join(tmp, "test.css"), 'w') as cssfile:
   ...         res = cssfile.write("body {}")
   ... 
-  ...     aiofuturetest(run_web_server, sleep=1)(
-  ...         config_static % tmp, "http://localhost:7070/static/test.css")  
+  ...     run_web_server(
+  ...         config_static % tmp,
+  ...         request_page="http://localhost:7070/static/test.css")  
   body {}
 
 And clear up...
@@ -132,16 +136,20 @@ On setup aio searches the paths of modules listed in the aio:modules option for 
   ... handler = aio.web.server.tests._example_route_handler
   ... """
 
-By decorating the route_handler function with @aio.web.server.route, the function is called with the request and the configuration for the route that is being handled
- 
-  >>> def route_handler(request, config):
+
+Routes
+~~~~~~
+  
+By decorating a function with @aio.web.server.route, the function is called with the request and the configuration for the route that is being handled
+
+  >>> @aio.web.server.route("test_template.html")  
+  ... def route_handler(request, config):
   ...     return {
   ...         'message': 'Hello, world'}
 
-  >>> aio.web.server.tests._example_route_handler = (
-  ...     aio.web.server.route('test_template.html')(route_handler))
+  >>> aio.web.server.tests._example_route_handler = route_handler
   
-  >>> aiofuturetest(run_web_server, sleep=1)(config_template)
+  >>> run_web_server(config_template)
   <html>
     <body>
       Hello, world
@@ -150,9 +158,18 @@ By decorating the route_handler function with @aio.web.server.route, the functio
 
   >>> aio.web.server.clear()
 
-A route handler can defer to other templates, for example according to the path. The @aio.web.server.route decorator does not require a template
+Templates
+~~~~~~~~~
+  
+A route handler can defer to other templates, for example according to the path.
 
-  >>> example_config_2 = """
+The @aio.web.server.route decorator does not require a template, but in that case the decorated function must return an aiohttp.web.StreamResponse object
+
+A route always takes 2 arguments - request and config, a template can take any arguments that it requires
+
+While you can use an @aio.web.template as a route handler, doing so would bypass the normal logging and request handling operations
+
+  >>> example_config = """
   ... [aio]
   ... modules = aio.web.server.tests
   ... log_level: ERROR
@@ -161,32 +178,97 @@ A route handler can defer to other templates, for example according to the path.
   ... factory: aio.web.server.server
   ... port: 7070
   ... 
-  ... [web/example-3/homepage]
-  ... match = /
-  ... handler = aio.web.server.tests._example_route_handler_2
+  ... [web/example-3/paths]
+  ... match = /{path:.*}
+  ... handler = aio.web.server.tests._example_route_handler
   ... """
 
+  >>> @aio.web.server.template("test_template.html")    
+  ... def template_handler_1(request):  
+  ...     return {'message': "Hello, world from template handler 1"}
 
-  >>> def template_handler(request):
-  ...     return {'message': "Hello, world in a template"}
+  >>> @aio.web.server.template("test_template.html")  
+  ... def template_handler_2(request):
+  ...     return {'message': "Hello, world from template handler 2"}  
+
+  >>> @aio.web.server.route
+  ... def route_handler(request, config):
+  ... 
+  ...     if request.path == "/path1":
+  ...         return (yield from template_handler_1(request))
+  ... 
+  ...     elif request.path == "/path2":
+  ...         return (yield from template_handler_2(request))
+
+  >>> aio.web.server.tests._example_route_handler = route_handler
   
-  >>> def route_handler_2(request, config):
-  ...     import pdb; pdb.set_trace()
-  
-  ...     return (yield from aio.web.server.template('test_template.html')(template_handler, request))
-
-  >>> aio.web.server.tests._example_route_handler_2 = aio.web.server.route(route_handler_2)
-  
-  >>> aiofuturetest(run_web_server, sleep=1)(example_config_2)
-
-  
-	
-We can get the associated templates for the web app
-
-  >>> webapp = aio.web.server.apps['example-2']
-
-  >>> import aiohttp_jinja2
-  >>> aiohttp_jinja2.get_env(webapp).list_templates()
-  ['test_template.html']
+  >>> run_web_server(
+  ...     example_config,
+  ...     request_page="http://localhost:7070/path1")  
+  <html>
+    <body>
+      Hello, world from template handler 1
+    </body>
+  </html>
 
   >>> aio.web.server.clear()
+  
+  >>> run_web_server(
+  ...     example_config,
+  ...     request_page="http://localhost:7070/path2")  
+  <html>
+    <body>
+      Hello, world from template handler 2
+    </body>
+  </html>
+
+  >>> aio.web.server.clear()
+  
+Fragments
+~~~~~~~~~
+
+Both routes and templates are expected to return a full html page, or an html response object.
+
+Fragments render a snippet of code, and are not expected to return a full page.
+
+Fragments cannot return an html response object, but can raise an html error if required
+
+  >>> example_config = """
+  ... [aio]
+  ... modules = aio.web.server.tests
+  ... log_level: ERROR
+  ... 
+  ... [server/example-3]
+  ... factory: aio.web.server.server
+  ... port: 7070
+  ... 
+  ... [web/example-3/paths]
+  ... match = /
+  ... handler = aio.web.server.tests._example_route_handler
+  ... """
+
+  >>> @aio.web.server.fragment("fragments/test_fragment.html")    
+  ... def fragment_handler(request, test_list):  
+  ...     return {'test_list': test_list}
+
+  >>> @aio.web.server.template("test_template.html")  
+  ... def template_handler(request, test_list):
+  ...     return {'message': (yield from fragment_handler(request, test_list))}  
+
+  >>> @aio.web.server.route
+  ... def route_handler(request, config):
+  ... 
+  ...     return (yield from template_handler(request, ["foo", "bar", "baz"]))
+
+  >>> aio.web.server.tests._example_route_handler = route_handler
+  
+  >>> run_web_server(
+  ...     example_config,
+  ...     request_page="http://localhost:7070/")  
+  <html>
+    <body>
+      <ul>
+        <li>foo</li><li>bar</li><li>baz</li>
+      </ul>
+    </body>
+  </html>

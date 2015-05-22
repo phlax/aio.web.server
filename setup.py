@@ -35,7 +35,7 @@ long_description = (
 try:
     long_description += (
         '\n'
-        + read("aio", "web", "README.rst")
+        + read("aio", "web", "server", "README.rst")
         + '\n')
 except FileNotFoundError:
     pass
@@ -58,7 +58,7 @@ setup(
     url='http://github.com/phlax/aio.web.server',
     license='GPL',
     packages=find_packages(),
-    namespace_packages=['aio'],
+    namespace_packages=['aio', "aio.web"],
     include_package_data=True,
     package_data={'': ['templates/*.html', '*.rst']},
     test_suite="aio.app.tests",

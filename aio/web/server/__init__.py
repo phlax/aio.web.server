@@ -3,13 +3,12 @@ import json
 import asyncio
 import ast
 import functools
-from collections import Mapping
 import mimetypes
 
 from zope.dottedname.resolve import resolve
-
 import aiohttp
 import aiohttp_jinja2
+import jinja2
 
 import aio.app
 import aio.http
@@ -19,13 +18,6 @@ log = logging.getLogger("aio.web")
 apps = {}
 
 APP_KEY = "aio_web_environment"
-import sys
-import jinja2
-
-
-def render_func(self, *la, **kwa):
-    import pdb; pdb.set_trace()
-
 
 
 class FileSystemLoader(jinja2.FileSystemLoader):
@@ -58,31 +50,6 @@ def setup_static(webapp, conf):
                 webapp['static'].append((module.__name__, path))
 
 
-
-class Template(jinja2.Template):
-
-
-    @asyncio.coroutine
-    def render(self, *args, **kwargs):
-        """This method accepts the same arguments as the `dict` constructor:
-        A dict, a dict subclass or some keyword arguments.  If no arguments
-        are given the context will be empty.  These two calls do the same::
-
-            template.render(knights='that say nih')
-            template.render({'knights': 'that say nih'})
-
-        This will return the rendered template as unicode string.
-        """
-        vars = dict(*args, **kwargs)
-        try:
-            result = yield from self.root_render_func(self.new_context(vars))
-            return jinja2.utils.concat(result)
-
-        except Exception:
-            exc_info = sys.exc_info()
-        return self.environment.handle_exception(exc_info, True)
-
-
 @asyncio.coroutine
 def setup_templates(webapp, conf):
     templates = []
@@ -107,12 +74,7 @@ def setup_templates(webapp, conf):
         templates.append(
             os.path.join(
                 resolve(module).__path__[0], "templates"))
-    env = aiohttp_jinja2.get_env(webapp)
-
-    loader = FileSystemLoader(templates)
-    env = aiohttp_jinja2.setup(webapp, loader=loader)
-    #env.template_class = Template
-    # env.loader = loader
+    aiohttp_jinja2.setup(webapp, loader=FileSystemLoader(templates))
 
 
 @asyncio.coroutine
@@ -171,8 +133,8 @@ def protocol(name):
     import aio.http
     http_protocol = yield from aio.http.protocol(name)
     webapp = http_protocol._app
-    import aio.web    
-    aio.web.apps[name] = webapp
+    import aio.web.server
+    aio.web.server.apps[name] = webapp
     try:
         conf = aio.app.config["web/%s" % name]
     except KeyError:
@@ -193,42 +155,9 @@ def server(name, proto, address, port):
 
 
 def clear():
-    import aio.web
-    aio.web.apps = {}
+    import aio.web.server
+    aio.web.server.apps = {}
     aio.app.clear()
-
-
-@asyncio.coroutine
-def render_string(template_name, request, context, *, app_key):
-    env = request.app.get(app_key)
-    if env is None:
-        raise web.HTTPInternalServerError(
-            text=("Template engine is not initialized, "
-                  "call aiohttp_jinja2.setup(app_key={}) first"
-                  "".format(app_key)))
-    try:
-        template = env.get_template(template_name)
-    except jinja2.TemplateNotFound:
-        raise web.HTTPInternalServerError(
-            text="Template '{}' not found".format(template_name))
-    if not isinstance(context, Mapping):
-        raise web.HTTPInternalServerError(
-            text="context should be mapping, not {}".format(type(context)))
-    text = yield from template.render(context)
-    return text
-
-
-
-@asyncio.coroutine
-def render_template(template_name, request, context, *,
-                    app_key=APP_KEY, encoding='utf-8'):
-    response = aiohttp.web.Response()
-    text = yield from render_string(template_name, request, context, app_key=app_key)
-    response.content_type = 'text/html'
-    response.charset = encoding
-    response.text = text
-    return response
-
 
 
 def route(*la, **kwa):
@@ -356,8 +285,6 @@ def template(*la, **kwa):
 
 def fragment(*la, **kwa):
     app_key = kwa.get("app_key", aiohttp_jinja2.APP_KEY)
-    encoding = kwa.get("encoding", 'utf-8')
-    status = kwa.get("status", 200)
 
     if len(la) == 1 and not callable(la[0]):
         template_name = la[0]
@@ -370,7 +297,7 @@ def fragment(*la, **kwa):
         @functools.wraps(func)
         def wrapped(*la, **kwa):
             request = la[0]
-            
+
             if asyncio.iscoroutinefunction(func):
                 coro = func
             else:
@@ -379,7 +306,7 @@ def fragment(*la, **kwa):
             try:
                 context = yield from coro(*la)
             except Exception as e:
-                import traceback                
+                import traceback
                 traceback.print_exc()
                 log.error("Error calling fragment handler: %s" % e)
                 raise e
@@ -393,7 +320,7 @@ def fragment(*la, **kwa):
                     + " or return a string")
                 log.error(error_message)
                 raise Exception(error_message)
-                
+
             try:
                 response = aiohttp_jinja2.render_string(
                     template_name, request, context,
@@ -410,7 +337,8 @@ def fragment(*la, **kwa):
         return wrapper(la[0])
     return wrapper
 
-from aio.web import fragments
+from aio.web.server import fragments
+fragments
 
 
 def filestream(request, filepath):
@@ -440,4 +368,3 @@ def filestream(request, filepath):
                 resp.write(chunk)
                 chunk = f.read(limit)
     return resp
-
