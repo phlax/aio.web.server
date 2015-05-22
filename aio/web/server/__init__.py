@@ -11,7 +11,7 @@ import aiohttp_jinja2
 import jinja2
 
 import aio.app
-import aio.http
+import aio.http.server
 
 import logging
 log = logging.getLogger("aio.web")
@@ -130,7 +130,6 @@ def setup_sockets(webapp, conf):
 
 @asyncio.coroutine
 def protocol(name):
-    import aio.http
     http_protocol = yield from aio.http.server.protocol(name)
     webapp = http_protocol._app
     import aio.web.server
