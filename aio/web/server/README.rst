@@ -17,7 +17,8 @@ The route is given a name derived from the section name. In this case "homepage"
 
   >>> web_server_config = """
   ... [aio]
-  ... log_level: ERROR
+  ... log_level = ERROR
+  ... modules = aio.web.server
   ... 
   ... [server/example]
   ... factory = aio.web.server.factory
@@ -88,6 +89,7 @@ The "web/" section takes a static_url and a static_dir option for hosting static
   >>> config_static = """
   ... [aio]
   ... log_level: ERROR
+  ... modules = aio.web.server  
   ... 
   ... [server/test]
   ... factory: aio.web.server.factory
@@ -124,7 +126,8 @@ On setup aio searches the paths of modules listed in the aio:modules option for 
 
   >>> config_template = """
   ... [aio]
-  ... modules = aio.web.server.tests
+  ... modules = aio.web.server
+  ...        aio.web.server.tests
   ... log_level: ERROR
   ... 
   ... [server/example-2]
@@ -171,8 +174,9 @@ While you can use an @aio.web.template as a route handler, doing so would bypass
 
   >>> example_config = """
   ... [aio]
-  ... modules = aio.web.server.tests
   ... log_level: ERROR
+  ... modules = aio.web.server
+  ...        aio.web.server.tests  
   ... 
   ... [server/example-3]
   ... factory: aio.web.server.factory
@@ -235,8 +239,9 @@ Fragments cannot return an html response object, but can raise an html error if 
 
   >>> example_config = """
   ... [aio]
-  ... modules = aio.web.server.tests
   ... log_level: ERROR
+  ... modules = aio.web.server
+  ...        aio.web.server.tests  
   ... 
   ... [server/example-3]
   ... factory: aio.web.server.factory
