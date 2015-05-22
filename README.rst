@@ -31,13 +31,11 @@ Example configuration for a hello world web page
 .. code:: ini
 
 	  [server/test]
-	  factory = aio.http.server
-	  protocol = aio.web.server.protocol
+	  factory = aio.web.server.factory
 	  port = 8080
 
 	  [web/test]
 	  routes = GET / my.example.handler
-
 
 And the corresponding handler
 
