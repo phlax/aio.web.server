@@ -20,7 +20,7 @@ The route is given a name derived from the section name. In this case "homepage"
   ... log_level: ERROR
   ... 
   ... [server/example]
-  ... factory = aio.web.server.server
+  ... factory = aio.web.server.factory
   ... port = 7070
   ... 
   ... [web/example/homepage]
@@ -90,7 +90,7 @@ The "web/" section takes a static_url and a static_dir option for hosting static
   ... log_level: ERROR
   ... 
   ... [server/test]
-  ... factory: aio.web.server.server
+  ... factory: aio.web.server.factory
   ... port: 7070
   ... 
   ... [web/test]
@@ -128,7 +128,7 @@ On setup aio searches the paths of modules listed in the aio:modules option for 
   ... log_level: ERROR
   ... 
   ... [server/example-2]
-  ... factory: aio.web.server.server
+  ... factory: aio.web.server.factory
   ... port: 7070
   ... 
   ... [web/example-2/homepage]
@@ -175,7 +175,7 @@ While you can use an @aio.web.template as a route handler, doing so would bypass
   ... log_level: ERROR
   ... 
   ... [server/example-3]
-  ... factory: aio.web.server.server
+  ... factory: aio.web.server.factory
   ... port: 7070
   ... 
   ... [web/example-3/paths]
@@ -239,7 +239,7 @@ Fragments cannot return an html response object, but can raise an html error if 
   ... log_level: ERROR
   ... 
   ... [server/example-3]
-  ... factory: aio.web.server.server
+  ... factory: aio.web.server.factory
   ... port: 7070
   ... 
   ... [web/example-3/paths]

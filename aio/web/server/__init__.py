@@ -131,7 +131,7 @@ def setup_sockets(webapp, conf):
 @asyncio.coroutine
 def protocol(name):
     import aio.http
-    http_protocol = yield from aio.http.protocol(name)
+    http_protocol = yield from aio.http.server.protocol(name)
     webapp = http_protocol._app
     import aio.web.server
     aio.web.server.apps[name] = webapp
@@ -148,9 +148,9 @@ def protocol(name):
 
 
 @asyncio.coroutine
-def server(name, proto, address, port):
+def factory(name, proto, address, port):
     return (
-        yield from aio.http.server(
+        yield from aio.http.server.factory(
             name, proto or protocol, address, port))
 
 

@@ -6,8 +6,7 @@ from aio.app.runner import runner
 
 CONFIG = """
 [server/test]
-factory: aio.http.server
-protocol: aio.web.server.protocol
+factory: aio.web.server.factory
 port: 7070
 
 [web/test]
