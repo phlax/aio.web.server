@@ -11,7 +11,7 @@ install_requires = [
     'setuptools',
     'aio.core',
     'aio.app',
-    'aio.http',
+    'aio.http.server',
     'aiohttp',
     'aiohttp_jinja2']
 
