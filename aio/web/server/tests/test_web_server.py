@@ -6,11 +6,12 @@ from aio.app.runner import runner
 
 CONFIG = """
 [server/test]
-factory: aio.web.server.factory
-port: 7070
+factory = aio.web.server.factory
+port = 7070
 
-[web/test]
-routes: GET / aio.web.server.tests.handle_hello_web_world
+[web/test/route]
+match = /
+route = aio.web.server.tests.handle_hello_web_world
 """
 
 

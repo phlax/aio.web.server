@@ -34,10 +34,11 @@ Example configuration for a hello world web page
 	  factory = aio.web.server.factory
 	  port = 8080
 
-	  [web/test]
-	  routes = GET / my.example.handler
+	  [web/test/page]
+	  match = /
+	  route = my.example.handler
 
-And the corresponding handler
+And the corresponding route handler
 
 .. code:: python
 

@@ -11,7 +11,7 @@ In the following configuration example a server named "example-1" is set up.
 
 Any sections that start with "web/example-1/" will be treated as route definitions.
 
-The route definition should provide a "match" and a "handler" at a minimum.
+The route definition should provide a "match" and a "route" at a minimum.
 
 The route is given a name derived from the section name. In this case "homepage"
 
@@ -25,7 +25,7 @@ The route is given a name derived from the section name. In this case "homepage"
   ... 
   ... [web/example/homepage]
   ... match = /
-  ... handler = aio.web.server.tests._example_handler
+  ... route = aio.web.server.tests._example_handler
   ... """  
 
   >>> import asyncio
@@ -133,7 +133,7 @@ On setup aio searches the paths of modules listed in the aio:modules option for 
   ... 
   ... [web/example-2/homepage]
   ... match = /
-  ... handler = aio.web.server.tests._example_route_handler
+  ... route = aio.web.server.tests._example_route_handler
   ... """
 
 
@@ -180,7 +180,7 @@ While you can use an @aio.web.template as a route handler, doing so would bypass
   ... 
   ... [web/example-3/paths]
   ... match = /{path:.*}
-  ... handler = aio.web.server.tests._example_route_handler
+  ... route = aio.web.server.tests._example_route_handler
   ... """
 
   >>> @aio.web.server.template("test_template.html")    
@@ -244,7 +244,7 @@ Fragments cannot return an html response object, but can raise an html error if 
   ... 
   ... [web/example-3/paths]
   ... match = /
-  ... handler = aio.web.server.tests._example_route_handler
+  ... route = aio.web.server.tests._example_route_handler
   ... """
 
   >>> @aio.web.server.fragment("fragments/test_fragment.html")    

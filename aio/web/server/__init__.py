@@ -89,7 +89,7 @@ def setup_routes(webapp, conf):
         if match.startswith('r"') or match.startswith("r'"):
             match = ast.literal_eval(match)
         method = route_config.get("method", "GET")
-        handler = resolve(route_config['handler'])
+        handler = resolve(route_config['route'])
 
         log.debug('adding route (%s): %s %s %s' % (
             name, method, match, handler))
