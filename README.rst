@@ -54,7 +54,7 @@ And save the following into a file named my_example.py
 	  import aio.web.server
 
 	  @aio.web.server.route
-	  def handler(request):
+	  def handler(request, config):
 	      return aiohttp.web.Response(body=b"Hello, web world")
 
 
