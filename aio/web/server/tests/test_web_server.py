@@ -3,7 +3,7 @@ from configparser import ConfigParser
 
 import aiohttp.web
 
-from aio.testing import aiofuturetest, aiotest
+import aio.testing
 from aio.web.server.testing import AioWebAppTestCase
 import aio.web.server
 from aio.core.exceptions import MissingConfiguration
@@ -26,13 +26,13 @@ def example_factory(web_app, conf):
 
 class WebServerFactoryTestCase(AioWebAppTestCase):
 
-    @aiotest
+    @aio.testing.run_until_complete
     def test_server_factory_no_config(self):
         with self.assertRaises(MissingConfiguration):
             yield from aio.web.server.factory(
                 "TEST", None, None, "8080")
 
-    @aiofuturetest
+    @aio.testing.run_forever
     def test_web_factory_no_port(self):
         aio.app.config = ConfigParser()
         aio.app.config.read_dict({})
@@ -40,7 +40,7 @@ class WebServerFactoryTestCase(AioWebAppTestCase):
             yield from aio.web.server.factory(
                 "TEST", None, None, None)
 
-    @aiofuturetest
+    @aio.testing.run_forever
     def test_web_factory_empty_config(self):
         aio.app.config = ConfigParser()
         aio.app.config.read_dict({})
@@ -49,7 +49,7 @@ class WebServerFactoryTestCase(AioWebAppTestCase):
         self.assertIsInstance(
             srv, asyncio.base_events.Server)
 
-    @aiofuturetest
+    @aio.testing.run_forever
     def test_web_factory(self):
         aio.app.config = ConfigParser()
         aio.app.config.read_dict(
@@ -67,7 +67,7 @@ class WebServerFactoryTestCase(AioWebAppTestCase):
             aio.web.server.apps['TEST']['foo'],
             "bar")
 
-    @aiofuturetest
+    @aio.testing.run_forever
     def test_web_factory_custom_protocol(self):
         aio.app.config = ConfigParser()
         aio.app.config.read_dict({})
@@ -92,12 +92,12 @@ class WebServerFactoryTestCase(AioWebAppTestCase):
 
 class WebServerProtocolTestCase(AioWebAppTestCase):
 
-    @aiotest
+    @aio.testing.run_until_complete
     def test_web_protocol_no_config(self):
         with self.assertRaises(MissingConfiguration):
             yield from aio.web.server.protocol("TEST")
 
-    @aiotest
+    @aio.testing.run_until_complete
     def test_web_protocol_empty_config(self):
         aio.app.config = ConfigParser()
         aio.app.config.read_dict({})
@@ -105,7 +105,7 @@ class WebServerProtocolTestCase(AioWebAppTestCase):
         self.assertIsInstance(
             protocol, aiohttp.web.RequestHandlerFactory)
 
-    @aiotest
+    @aio.testing.run_until_complete
     def test_web_protocol_factory(self):
         aio.app.config = ConfigParser()
         aio.app.config.read_dict(

@@ -6,7 +6,7 @@ from configparser import ConfigParser
 import aiohttp
 import aiohttp_jinja2
 
-from aio.testing import aiotest
+import aio.testing
 from aio.web.server.testing import AioWebAppTestCase
 from aio.web.server import factories
 from aio.core.exceptions import BadConfiguration
@@ -49,14 +49,14 @@ class WebSetupFactoryTestCase(WebFactoryTestCase):
 
 class WebRoutesFactoryTestCase(WebSetupFactoryTestCase):
 
-    @aiotest
+    @aio.testing.run_until_complete
     def test_routes_factory_no_config(self):
         web_app = yield from self._get_web_app()
         yield from factories.routes_factory(
             web_app,
             {})
 
-    @aiotest
+    @aio.testing.run_until_complete
     def test_routes_factory(self):
         config = ConfigParser()
         config.read_dict(
@@ -74,7 +74,7 @@ class WebRoutesFactoryTestCase(WebSetupFactoryTestCase):
 
 class WebStaticFactoryTestCase(WebSetupFactoryTestCase):
 
-    @aiotest
+    @aio.testing.run_until_complete
     def test_static_factory_no_config(self):
         web_app = yield from self._get_web_app()
         yield from factories.static_factory(
@@ -83,7 +83,7 @@ class WebStaticFactoryTestCase(WebSetupFactoryTestCase):
         self.assertEqual(
             web_app.router._urls, [])
 
-    @aiotest
+    @aio.testing.run_until_complete
     def test_static_factory(self):
         """
         [web/TEST]
@@ -106,7 +106,7 @@ class WebStaticFactoryTestCase(WebSetupFactoryTestCase):
 
 class WebTemplatesFactoryTestCase(WebFactoryTestCase):
 
-    @aiotest
+    @aio.testing.run_until_complete
     def test_templates_factory_no_config(self):
         """
         [web/TEST]
@@ -119,7 +119,7 @@ class WebTemplatesFactoryTestCase(WebFactoryTestCase):
         with self.assertRaises(AttributeError):
             env.list_templates()
 
-    @aiotest
+    @aio.testing.run_until_complete
     def test_templates_factory_web_conf(self):
         """
         [web/TEST]
@@ -134,7 +134,7 @@ class WebTemplatesFactoryTestCase(WebFactoryTestCase):
             [x for x in env.list_templates(extensions=["html"])],
             ['fragments/test_fragment.html', 'test_template.html'])
 
-    @aiotest
+    @aio.testing.run_until_complete
     def test_templates_factory_web_app_conf(self):
         """
         [aio/web]
@@ -151,7 +151,7 @@ class WebTemplatesFactoryTestCase(WebFactoryTestCase):
             [x for x in env.list_templates(extensions=["html"])],
             ['fragments/test_fragment.html', 'test_template.html'])
 
-    @aiotest
+    @aio.testing.run_until_complete
     def test_templates_factory_aio_conf(self):
         """
         [aio]
@@ -168,7 +168,7 @@ class WebTemplatesFactoryTestCase(WebFactoryTestCase):
             [x for x in env.list_templates(extensions=["html"])],
             ['fragments/test_fragment.html', 'test_template.html'])
 
-    @aiotest
+    @aio.testing.run_until_complete
     def test_templates_factory_multiple_modules(self):
         """
         [web/TEST]
@@ -188,13 +188,13 @@ class WebTemplatesFactoryTestCase(WebFactoryTestCase):
 
 class WebFiltersFactoryTestCase(WebSetupFactoryTestCase):
 
-    @aiotest
+    @aio.testing.run_until_complete
     def test_filters_factory_no_config(self):
         yield from factories.filters_factory(
             (yield from self._get_web_app()),
             {})
 
-    @aiotest
+    @aio.testing.run_until_complete
     def test_filters_factory(self):
         web_app = yield from self._get_web_app()
         yield from factories.filters_factory(
@@ -207,7 +207,7 @@ class WebFiltersFactoryTestCase(WebSetupFactoryTestCase):
             env.filters['my_filter'],
             aio.web.server.tests.test_factories.example_filter)
 
-    @aiotest
+    @aio.testing.run_until_complete
     def test_filters_factory_bad_handler(self):
         web_app = yield from self._get_web_app()
         with self.assertRaises(BadConfiguration):

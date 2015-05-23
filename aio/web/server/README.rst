@@ -52,9 +52,9 @@ Now lets create a route and make it importable
 Lets set up a test to run the server and request a web page
   
   >>> from aio.app.runner import runner    
-  >>> from aio.testing import aiofuturetest
+  >>> import aio.testing
 
-  >>> @aiofuturetest(sleep=1)
+  >>> @aio.testing.run_forever(sleep=1)
   ... def run_web_server(config, request_page="http://localhost:7070"):
   ...     yield from runner(['run'], config_string=config)
   ... 
@@ -121,7 +121,7 @@ By default template resources are registered for any modules listed in aio:modul
 
 Lets create a test to run the server and print the list of installed jinja templates
 
-  >>> @aiofuturetest(sleep=1)
+  >>> @aio.testing.run_forever(sleep=1)
   ... def run_server_print_templates(config_string):
   ...     yield from runner(['run'], config_string=config_string)
   ... 
@@ -237,12 +237,11 @@ Routes
   ... route = aio.web.server.tests._example_route_handler
   ... """
 
-While you can use any coroutine as a route handler, doing so would bypass the aio logging and request/response handling operations
+While you can use any coroutine as a route handler, doing so would bypass logging and request/response handling.
 
 Functions decorated with @aio.web.server.route receive 2 parameters, request and config
 
-The config corresponds to the relevant web/SERVER_NAME/ROUTE_NAME section that the route was created in
-
+The config corresponds to the relevant web/*SERVER_NAME*/*ROUTE_NAME* section that the route was created in
 
   >>> @aio.web.server.route("test_template.html")  
   ... def route_handler(request, config):
@@ -258,6 +257,6 @@ The config corresponds to the relevant web/SERVER_NAME/ROUTE_NAME section that t
       Hello, world at / from match(/) handled by: aio.web.server.tests._example_route_handler
     </body>
   </html>
-
+  
   >>> aio.web.server.clear()
 
