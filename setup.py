@@ -8,7 +8,7 @@ from setuptools import setup, find_packages
 version = "0.0.7"
 
 install_requires = [
-    'setuptools',
+    'distribute',
     'aio.core',
     'aio.app',
     'aio.http.server',
@@ -60,7 +60,6 @@ setup(
     packages=find_packages(),
     namespace_packages=['aio', "aio.web"],
     include_package_data=True,
-    package_data={'': ['templates/*.html', 'templates/fragments/*.html', '*.rst', "aio.conf"]},
     test_suite="aio.app.tests",
     zip_safe=False,
     tests_require=tests_require,
