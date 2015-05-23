@@ -8,7 +8,6 @@ import aiohttp_jinja2
 
 from aio.testing import aiotest
 from aio.web.server.testing import AioWebAppTestCase
-from aio.app.runner import runner
 from aio.web.server import factories
 from aio.core.exceptions import BadConfiguration
 import aio.web.server.tests.test_factories
@@ -61,7 +60,7 @@ class WebRoutesFactoryTestCase(WebSetupFactoryTestCase):
     def test_routes_factory(self):
         config = ConfigParser()
         config.read_dict(
-            {'web/TEST/route' : {
+            {'web/TEST/route': {
                 'match': '/',
                 'route': "aio.web.server.tests.test_factories.test_route"}})
         aio.app.config = config
@@ -142,13 +141,12 @@ class WebTemplatesFactoryTestCase(WebFactoryTestCase):
         modules = aio.web.server.tests
         """
         aio.app.config = {
-            'aio/web' :{'modules': 'aio.web.server.tests'}}
+            'aio/web': {'modules': 'aio.web.server.tests'}}
         web_app = yield from self._get_web_app()
         yield from factories.templates_factory(
             web_app,
             {})
         env = aiohttp_jinja2.get_env(web_app)
-        tl = env.list_templates(extensions=[".html"])
         self.assertEqual(
             [x for x in env.list_templates(extensions=["html"])],
             ['fragments/test_fragment.html', 'test_template.html'])
@@ -160,13 +158,12 @@ class WebTemplatesFactoryTestCase(WebFactoryTestCase):
         modules = aio.web.server.tests
         """
         aio.app.config = {
-            'aio/web' :{'modules': 'aio.web.server.tests'}}
+            'aio/web': {'modules': 'aio.web.server.tests'}}
         web_app = yield from self._get_web_app()
         yield from factories.templates_factory(
             web_app,
             {})
         env = aiohttp_jinja2.get_env(web_app)
-        tl = env.list_templates(extensions=[".html"])
         self.assertEqual(
             [x for x in env.list_templates(extensions=["html"])],
             ['fragments/test_fragment.html', 'test_template.html'])
@@ -202,7 +199,9 @@ class WebFiltersFactoryTestCase(WebSetupFactoryTestCase):
         web_app = yield from self._get_web_app()
         yield from factories.filters_factory(
             web_app,
-            {'filters': "my_filter aio.web.server.tests.test_factories.example_filter"})
+            {'filters': (
+                "my_filter "
+                + "aio.web.server.tests.test_factories.example_filter")})
         env = aiohttp_jinja2.get_env(web_app)
         self.assertEqual(
             env.filters['my_filter'],
@@ -214,4 +213,6 @@ class WebFiltersFactoryTestCase(WebSetupFactoryTestCase):
         with self.assertRaises(BadConfiguration):
             yield from factories.filters_factory(
                 web_app,
-                {'filters': "my_filter aio.web.server.tests.test_factories._BAD_example_filter"})
+                {'filters': (
+                    "my_filter "
+                    + "aio.web.server.tests.test_factories._BAD_filter")})

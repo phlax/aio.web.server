@@ -5,7 +5,6 @@ import aiohttp.web
 
 from aio.testing import aiofuturetest, aiotest
 from aio.web.server.testing import AioWebAppTestCase
-from aio.app.runner import runner
 import aio.web.server
 from aio.core.exceptions import MissingConfiguration
 
@@ -18,6 +17,7 @@ port = 7070
 match = /
 route = aio.web.server.tests.handle_hello_web_world
 """
+
 
 @asyncio.coroutine
 def example_factory(web_app, conf):
@@ -37,7 +37,7 @@ class WebServerFactoryTestCase(AioWebAppTestCase):
         aio.app.config = ConfigParser()
         aio.app.config.read_dict({})
         with self.assertRaises(ValueError):
-            srv = yield from aio.web.server.factory(
+            yield from aio.web.server.factory(
                 "TEST", None, None, None)
 
     @aiofuturetest
@@ -55,7 +55,8 @@ class WebServerFactoryTestCase(AioWebAppTestCase):
         aio.app.config.read_dict(
             {"aio/web": {
                 'factory_types': 'example',
-                "example_factory": "aio.web.server.tests.test_web_server.example_factory"},
+                "example_factory": (
+                    "aio.web.server.tests.test_web_server.example_factory")},
              "web/TEST": {
                  "foo": "bar"}})
         srv = yield from aio.web.server.factory(
@@ -65,11 +66,11 @@ class WebServerFactoryTestCase(AioWebAppTestCase):
         self.assertEqual(
             aio.web.server.apps['TEST']['foo'],
             "bar")
-        
+
     @aiofuturetest
     def test_web_factory_custom_protocol(self):
         aio.app.config = ConfigParser()
-        aio.app.config.read_dict({})        
+        aio.app.config.read_dict({})
 
         @asyncio.coroutine
         def custom_protocol(name):
@@ -79,7 +80,7 @@ class WebServerFactoryTestCase(AioWebAppTestCase):
             http_app['foo'] = 'baz'
             aio.web.server.apps[name] = http_app
             return http_app.make_handler()
-        
+
         srv = yield from aio.web.server.factory(
             "TEST", custom_protocol, None, "8080")
         self.assertIsInstance(
@@ -87,7 +88,7 @@ class WebServerFactoryTestCase(AioWebAppTestCase):
         self.assertEqual(
             aio.web.server.apps['TEST']['foo'],
             "baz")
-        
+
 
 class WebServerProtocolTestCase(AioWebAppTestCase):
 
@@ -110,7 +111,8 @@ class WebServerProtocolTestCase(AioWebAppTestCase):
         aio.app.config.read_dict(
             {"aio/web": {
                 'factory_types': 'example',
-                "example_factory": "aio.web.server.tests.test_web_server.example_factory"},
+                "example_factory": (
+                    "aio.web.server.tests.test_web_server.example_factory")},
              "web/TEST": {
                  "foo": "bar"}})
         protocol = yield from aio.web.server.protocol("TEST")

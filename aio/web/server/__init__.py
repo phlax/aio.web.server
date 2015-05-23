@@ -1,7 +1,5 @@
-import os
 import asyncio
 import functools
-import mimetypes
 
 from zope.dottedname.resolve import resolve
 import aiohttp
@@ -21,7 +19,7 @@ apps = {}
 def protocol(name):
     if not aio.app.config:
         raise MissingConfiguration("No system configuration!")
-    
+
     http_protocol = yield from aio.http.server.protocol(name)
     webapp = http_protocol._app
     aio.web.server.apps[name] = webapp
