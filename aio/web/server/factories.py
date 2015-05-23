@@ -18,6 +18,24 @@ class FileSystemLoader(jinja2.FileSystemLoader):
     pass
 
 
+def get_template_dirs(conf):
+    template_dirs = ''
+    try:
+        template_dirs = conf['template_dirs']
+    except KeyError:
+        try:
+            template_dirs = aio.app.config["aio/web"]["template_dirs"]
+        except (KeyError, TypeError):
+            pass
+    except TypeError:
+        pass
+    if template_dirs:
+        return [
+            x.strip() for x in
+            template_dirs.split("\n") if x.strip()]
+    return []
+
+
 def get_factory_modules(conf):
     factory_modules = ''
     try:
@@ -68,12 +86,20 @@ def static_factory(web_app, conf):
 def templates_factory(web_app, conf):
     templates = []
     template_modules = get_factory_modules(conf)
+    template_dirs = get_template_dirs(conf)
+
     if template_modules:
         log.debug("Setting up templates for: %s" % web_app['name'])
         for module in template_modules:
             templates.append(
                 os.path.join(
                     resolve(module).__path__[0], "templates"))
+
+    if template_dirs:
+        for template_dir in template_dirs:
+            templates.append(os.path.abspath(template_dir))
+
+    if templates:
         aiohttp_jinja2.setup(web_app, loader=FileSystemLoader(templates))
     else:
         aiohttp_jinja2.setup(web_app)

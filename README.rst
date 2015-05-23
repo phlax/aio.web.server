@@ -25,10 +25,11 @@ Install with:
 
 	  pip install aio.web.server
 
-Quick start - Hello world web page
-----------------------------------
+	  
+Quick start - Hello world web server
+------------------------------------
 
-Create a web server that servers a hello world page
+Create a web server that says hello
 
 Save the following into a file "hello.conf"
 
