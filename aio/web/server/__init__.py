@@ -10,6 +10,7 @@ import aiohttp_jinja2
 import aio.app
 import aio.http.server
 import aio.web.server
+from aio.core.exceptions import MissingConfiguration
 
 import logging
 log = logging.getLogger("aio.web")
@@ -20,7 +21,9 @@ APP_KEY = "aio_web_environment"
 
 @asyncio.coroutine
 def protocol(name):
-
+    if not aio.app.config:
+        raise MissingConfiguration("No system configuration!")
+    
     http_protocol = yield from aio.http.server.protocol(name)
     webapp = http_protocol._app
     aio.web.server.apps[name] = webapp
