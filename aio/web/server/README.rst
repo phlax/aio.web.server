@@ -119,18 +119,26 @@ By default template resources are registered for any modules listed in aio:modul
   ... port = 7070  
   ... """  
 
-The aio.web.server.tests module has 2 html templates
+Lets create a test to run the server and print the list of installed jinja templates
 
   >>> @aiofuturetest(sleep=1)
-  ... def load_server_modules(config_string):
-  ...     yield from runner(['run'], config_string=config_string)  
+  ... def run_server_print_templates(config_string):
+  ...     yield from runner(['run'], config_string=config_string)
+  ... 
+  ...     def print_templates():
+  ...         web_app = aio.web.server.apps['server_name']
+  ...         print(
+  ...             [x for x in
+  ...              aiohttp_jinja2.get_env(
+  ...                  web_app).list_templates(extensions=["html"])])
+  ...         aio.web.server.clear()
+  ... 
+  ...     return print_templates
 
-  >>> load_server_modules(config)
-  >>> web_app = aio.web.server.apps['server_name']
-  >>> [x for x in aiohttp_jinja2.get_env(web_app).list_templates(extensions=["html"])]
-  ['fragments/test_fragment.html', 'test_template.html']
+The aio.web.server.tests module has 2 html templates
   
-  >>> aio.web.server.clear()
+  >>> run_server_print_templates(config)
+  ['fragments/test_fragment.html', 'test_template.html']
   
 We can set the modules for all web apps in the aio/web:modules option
 
@@ -148,14 +156,10 @@ This will override the setting in aio:modules
   ... port = 7070  
   ... """  
 
-  >>> load_server_modules(config)
-  >>> web_app = aio.web.server.apps['server_name']
-  >>> [x for x in aiohttp_jinja2.get_env(web_app).list_templates(extensions=["html"])]
+  >>> run_server_print_templates(config)
   ['fragments/test_fragment.html', 'test_template.html']
-  
-  >>> aio.web.server.clear()
 
-And you can set the modules in the web/server_name:modules option.
+Or you can set the modules in the web/*SERVER_NAME*:modules option.
 
 This will override the setting in both aio/web:modules and aio:modules
   
@@ -175,18 +179,14 @@ This will override the setting in both aio/web:modules and aio:modules
   ... port = 7070  
   ... """  
 
-  >>> load_server_modules(config)
-  >>> web_app = aio.web.server.apps['server_name']
-  >>> [x for x in aiohttp_jinja2.get_env(web_app).list_templates(extensions=["html"])]
+  >>> run_server_print_templates(config)
   []
   
-  >>> aio.web.server.clear()
-
 
 Static directory
 ----------------
 
-The "web/" section takes a static_url and a static_dir option for hosting static files
+The web/*SERVER_NAME* section takes a static_url and a static_dir option for hosting static files
 
   >>> config_static = """
   ... [aio]
@@ -205,16 +205,16 @@ The "web/" section takes a static_url and a static_dir option for hosting static
   >>> import os
   >>> import tempfile
 
+Lets create a temporary directory and add a css file to it
+  
   >>> with tempfile.TemporaryDirectory() as tmp:
   ...     with open(os.path.join(tmp, "test.css"), 'w') as cssfile:
-  ...         res = cssfile.write("body {}")
+  ...         res = cssfile.write("body {background: black}")
   ... 
   ...     run_web_server(
   ...         config_static % tmp,
   ...         request_page="http://localhost:7070/static/test.css")  
-  body {}
-
-And clear up...
+  body {background: black}
 
   >>> aio.web.server.clear()
   
@@ -222,39 +222,40 @@ And clear up...
 Routes
 ------
 
-aio.web.server uses jinja2 templates under the hood
-
   >>> config_template = """
   ... [aio]
   ... modules = aio.web.server
   ...        aio.web.server.tests
   ... log_level: ERROR
   ... 
-  ... [server/example-2]
+  ... [server/server_name]
   ... factory: aio.web.server.factory
   ... port: 7070
   ... 
-  ... [web/example-2/homepage]
+  ... [web/server_name/route_name]
   ... match = /
   ... route = aio.web.server.tests._example_route_handler
   ... """
 
-  
-By decorating a function with @aio.web.server.route, the function is called with the request and the configuration for the route that is being handled
+While you can use any coroutine as a route handler, doing so would bypass the aio logging and request/response handling operations
 
-While you can use an coroutine as a route handler, doing so would bypass the aio logging and request/response handling operations
+Functions decorated with @aio.web.server.route receive 2 parameters, request and config
+
+The config corresponds to the relevant web/SERVER_NAME/ROUTE_NAME section that the route was created in
+
 
   >>> @aio.web.server.route("test_template.html")  
   ... def route_handler(request, config):
   ...     return {
-  ...         'message': 'Hello, world'}
+  ...         'message': 'Hello, world at %s from match(%s) handled by: %s' % (
+  ...             request.path, config['match'], config['route'])}
 
   >>> aio.web.server.tests._example_route_handler = route_handler
   
   >>> run_web_server(config_template)
   <html>
     <body>
-      Hello, world
+      Hello, world at / from match(/) handled by: aio.web.server.tests._example_route_handler
     </body>
   </html>
 
