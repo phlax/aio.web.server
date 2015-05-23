@@ -47,15 +47,15 @@ class WebSetupFactoryTestCase(WebFactoryTestCase):
         yield from factories.templates_factory(web_app, {})
         return web_app
 
-    
+
 class WebRoutesFactoryTestCase(WebSetupFactoryTestCase):
 
     @aiotest
-    def test_routes_factory_no_config(self):    
+    def test_routes_factory_no_config(self):
         web_app = yield from self._get_web_app()
         yield from factories.routes_factory(
             web_app,
-            {})        
+            {})
 
     @aiotest
     def test_routes_factory(self):
@@ -71,7 +71,7 @@ class WebRoutesFactoryTestCase(WebSetupFactoryTestCase):
             {})
         self.assertEqual(
             web_app.router['web/TEST/route'].url(), "/")
-        
+
 
 class WebStaticFactoryTestCase(WebSetupFactoryTestCase):
 
@@ -103,7 +103,7 @@ class WebStaticFactoryTestCase(WebSetupFactoryTestCase):
                 urls[0].url(filename=""), "/test_static/")
             self.assertEqual(
                 urls[0]._directory, tmp)
-        
+
 
 class WebTemplatesFactoryTestCase(WebFactoryTestCase):
 
@@ -184,10 +184,9 @@ class WebTemplatesFactoryTestCase(WebFactoryTestCase):
         env = aiohttp_jinja2.get_env(web_app)
         templ_list = [
             x for x in env.list_templates(extensions=["html"])]
-        self.assertTrue(
-            "fragments/test_fragment.html" in templ_list)
-        self.assertTrue(
-            "base.html" in templ_list)
+        self.assertEqual(
+            sorted(templ_list),
+            ['fragments/test_fragment.html', 'test_template.html'])
 
 
 class WebFiltersFactoryTestCase(WebSetupFactoryTestCase):
