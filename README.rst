@@ -25,40 +25,35 @@ Install with:
 
 	  pip install aio.web.server
 
+Quick start - Hello world web page
+----------------------------------
 
-Configuration
--------------
+Quickly create a web server that servers a hello world page
 
-Example configuration for a hello world web page
+The following will create a configuration file "hello.conf"
 
-.. code:: ini
+.. code:: bash
 
-	  [server/test]
-	  factory = aio.web.server.factory
-	  port = 8080
-
-	  [web/test/page]
-	  match = /
-	  route = my.example.handler
-
-And the corresponding route handler
-
+	  aio config -f hello.conf -s aio:modules aio.web.server
+	  aio config -f hello.conf -s server/test:factory aio.web.server.factory
+	  aio.config -f hello.conf -s web/test/page:match /
+	  aio.config -f hello.conf -s web/test/page:route my_example.handler
+	  
+And save the following into a file named my_example.py
+	  
 .. code:: python
 
-	  import asyncio
 	  import aiohttp
+	  import aio.web.server
 
-	  @asyncio.coroutine
+	  @aio.web.server.route
 	  def handler(request):
 	      return aiohttp.web.Response(body=b"Hello, web world")
 
 
-Running
--------
-
-Run with the aio command
+Run with the aio run command
 
 .. code:: bash
 
-	  aio run
+	  aio run -c hello.conf
 
