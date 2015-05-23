@@ -45,7 +45,6 @@ The route is given a name derived from the section name. In this case "homepage"
   ... def run_web_server(config, request_page="http://localhost:7070"):
   ...     yield from runner(['run'], config_string=config)
   ... 
-  ...     @asyncio.coroutine
   ...     def call_web_server():
   ...         result = yield from (
   ...             yield from aiohttp.request(
