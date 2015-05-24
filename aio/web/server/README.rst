@@ -29,11 +29,10 @@ Lets create a basic web server configuration
 
 Now lets create a route and make it importable
  
->>> import asyncio
 >>> import aiohttp
 >>> import aio.web.server.tests
 
->>> @asyncio.coroutine
+>>> @aio.web.server.route
 ... def handler(request):
 ...     return aiohttp.web.Response(body=b"Hello, web world")    
 
