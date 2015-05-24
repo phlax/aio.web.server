@@ -69,6 +69,8 @@ def filters_factory(web_app, conf):
                 raise BadConfiguration("Cannot import filter %s (%s)" % (
                     name, handler))
 
+            except Exception as e:
+                import pdb; pdb.set_trace()
 
 @asyncio.coroutine
 def static_factory(web_app, conf):

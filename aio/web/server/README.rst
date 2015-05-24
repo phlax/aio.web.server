@@ -214,7 +214,6 @@ The config corresponds to the relevant web/*SERVER_NAME*/*ROUTE_NAME* section th
 >>> aio.web.server.clear()
 
 
-
 Static directory
 ----------------
 
@@ -251,3 +250,42 @@ body {background: black}
 >>> aio.web.server.clear()
   
 
+Template filters
+----------------
+
+You can configure jinja filters by adding them either to the web/*SERVER_NAME:filters option
+
+>>> config = """
+... [aio]
+... log_level: ERROR
+... modules = aio.web.server  
+... 
+... [server/server_name]
+... factory: aio.web.server.factory
+... port: 7070
+... 
+... [web/server_name]
+... filters = example_filter aio.web.server.tests._example_filter
+... """
+
+>>> def filter(value, *la):
+...     return value
+
+>>> aio.web.server.tests._example_filter = filter
+
+>>> @aio.testing.run_forever(sleep=1)
+... def run_server_print_filters(config_string):
+...     yield from runner(['run'], config_string=config_string)
+... 
+...     def print_filters():
+...         web_app = aio.web.server.apps['server_name']
+...         env = aiohttp_jinja2.get_env(web_app)
+... 
+...         print("example_filter" in env.filters.keys())
+...         aio.web.server.clear()
+... 
+...     return print_filters
+
+
+>>> run_server_print_filters(config)
+True
