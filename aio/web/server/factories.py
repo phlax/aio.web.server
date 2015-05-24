@@ -69,8 +69,6 @@ def filters_factory(web_app, conf):
                 raise BadConfiguration("Cannot import filter %s (%s)" % (
                     name, handler))
 
-            except Exception as e:
-                import pdb; pdb.set_trace()
 
 @asyncio.coroutine
 def static_factory(web_app, conf):
@@ -105,6 +103,7 @@ def templates_factory(web_app, conf):
         aiohttp_jinja2.setup(web_app, loader=FileSystemLoader(templates))
     else:
         aiohttp_jinja2.setup(web_app)
+
     yield from filters_factory(web_app, conf)
 
 

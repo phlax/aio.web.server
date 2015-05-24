@@ -253,7 +253,7 @@ body {background: black}
 Template filters
 ----------------
 
-You can configure jinja filters by adding them either to the web/*SERVER_NAME:filters option
+You can configure jinja filters by adding them to the web/*SERVER_NAME:filters option
 
 >>> config = """
 ... [aio]
@@ -274,18 +274,20 @@ You can configure jinja filters by adding them either to the web/*SERVER_NAME:fi
 >>> aio.web.server.tests._example_filter = filter
 
 >>> @aio.testing.run_forever(sleep=1)
-... def run_server_print_filters(config_string):
+... def run_server_check_filter(config_string):
 ...     yield from runner(['run'], config_string=config_string)
 ... 
-...     def print_filters():
+...     def check_filter():
 ...         web_app = aio.web.server.apps['server_name']
 ...         env = aiohttp_jinja2.get_env(web_app)
 ... 
 ...         print("example_filter" in env.filters.keys())
-...         aio.web.server.clear()
 ... 
-...     return print_filters
+...     return check_filter
 
 
->>> run_server_print_filters(config)
+>>> run_server_check_filter(config)
 True
+
+You can also add them in the aio/web:filters option to configure filters for all web apps
+
