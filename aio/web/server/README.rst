@@ -33,10 +33,10 @@ Now lets create a route and make it importable
 >>> import aio.web.server.tests
 
 >>> @aio.web.server.route
-... def handler(request):
+... def route_handler(request, config):
 ...     return aiohttp.web.Response(body=b"Hello, web world")    
 
->>> aio.web.server.tests._example_handler = handler
+>>> aio.web.server.tests._example_handler = route_handler
 
 Lets set up a test to run the server and request a web page
   
