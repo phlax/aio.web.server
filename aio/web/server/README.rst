@@ -253,7 +253,8 @@ body {background: black}
 Template filters
 ----------------
 
-You can configure jinja filters by adding them to the web/*SERVER_NAME*:filters option
+You can configure jinja filters by adding them to the aio/web:filters option
+
 
 >>> config = """
 ... [aio]
@@ -264,9 +265,11 @@ You can configure jinja filters by adding them to the web/*SERVER_NAME*:filters 
 ... factory: aio.web.server.factory
 ... port: 7070
 ... 
-... [web/server_name]
+... [aio/web]
 ... filters = example_filter aio.web.server.tests._example_filter
 ... """
+
+The filter is *not* called in a coroutine
 
 >>> def filter(value, *la):
 ...     return value
@@ -281,7 +284,8 @@ You can configure jinja filters by adding them to the web/*SERVER_NAME*:filters 
 ...         web_app = aio.web.server.apps['server_name']
 ...         env = aiohttp_jinja2.get_env(web_app)
 ... 
-...         print("example_filter" in env.filters.keys())
+...         if "example_filter" in env.filters.keys():
+...             print("example_filter is in the jinja environment!")
 ... 
 ...     return check_filter
 
@@ -289,5 +293,46 @@ You can configure jinja filters by adding them to the web/*SERVER_NAME*:filters 
 >>> run_server_check_filter(config)
 True
 
-You can also add them in the aio/web:filters option to configure filters for all web apps
+>>> aio.web.server.clear()
 
+You can also add filters to the the web/server_name section, this will override the setting in aio/web
+
+
+>>> config = """
+... [aio]
+... log_level: ERROR
+... modules = aio.web.server  
+... 
+... [server/server_name]
+... factory: aio.web.server.factory
+... port: 7070
+... 
+... [aio/web]
+... filters = example_filter aio.web.server.tests._example_filter
+... 
+... [web/server_name]
+... filters = example_filter_2 aio.web.server.tests._example_filter
+... """
+example_filter is in the jinja environment!
+
+>>> @aio.testing.run_forever(sleep=1)
+... def run_server_check_filter(config_string):
+...     yield from runner(['run'], config_string=config_string)
+... 
+...     def check_filter():
+...         web_app = aio.web.server.apps['server_name']
+...         env = aiohttp_jinja2.get_env(web_app)
+... 
+...         if "example_filter" not in env.filters.keys():
+...             print("example_filter is not in the jinja environment!")
+... 
+...         if "example_filter_2" in env.filters.keys():
+...             print("example_filter_2 is in the jinja environment!")
+... 
+...     return check_filter
+
+>>> run_server_check_filter(config)
+
+>>> aio.web.server.clear()
+example_filter is not in the jinja environment!
+example_filter_2 is in the jinja environment!

@@ -59,15 +59,29 @@ def get_factory_modules(conf):
 
 @asyncio.coroutine
 def filters_factory(web_app, conf):
-    if conf.get("filters"):
-        env = aiohttp_jinja2.get_env(web_app)
-        for filt in conf['filters'].split("\n"):
+    filter_conf = conf.get("filters")
+    if not filter_conf:
+        try:
+            filter_conf = aio.app.config["aio/web"]["filters"]
+        except KeyError:
+            return
+        
+    filters = [
+        x.strip() for x in
+        filter_conf.split("\n")
+        if x]
+
+    env = aiohttp_jinja2.get_env(web_app)
+    for filt in filters:
+        try:
             name, handler = [x for x in filt.split(" ") if x]
-            try:
-                env.filters[name] = resolve(handler)
-            except ImportError:
-                raise BadConfiguration("Cannot import filter %s (%s)" % (
-                    name, handler))
+        except ValueError:
+            BadConfiguration("Bad filter definition: %s" % filt)
+        try:
+            env.filters[name] = resolve(handler)
+        except ImportError:
+            raise BadConfiguration("Cannot import filter %s (%s)" % (
+                name, handler))
 
 
 @asyncio.coroutine
