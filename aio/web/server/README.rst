@@ -240,7 +240,7 @@ Lets create a temporary directory and add a css file to it
   
 >>> with tempfile.TemporaryDirectory() as tmp:
 ...     with open(os.path.join(tmp, "test.css"), 'w') as cssfile:
-...         result = cssfile.write("body {background: red}")
+...         result = cssfile.write("body {background: black}")
 ... 
 ...     run_web_server(
 ...         config_static % tmp,
