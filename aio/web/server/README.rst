@@ -182,43 +182,6 @@ This will override the setting in both aio/web:modules and aio:modules
 
 >>> run_server_print_templates(config)
 ['fragments/test_fragment.html', 'test_template.html']
-  
-
-Static directory
-----------------
-
-The web/*SERVER_NAME* section takes a static_url and a static_dir option for hosting static files
-
->>> config_static = """
-... [aio]
-... log_level: ERROR
-... modules = aio.web.server  
-... 
-... [server/test]
-... factory: aio.web.server.factory
-... port: 7070
-... 
-... [web/test]
-... static_url: /static
-... static_dir: %s
-... """
-
->>> import os
->>> import tempfile
-
-Lets create a temporary directory and add a css file to it
-  
->>> with tempfile.TemporaryDirectory() as tmp:
-...     with open(os.path.join(tmp, "test.css"), 'w') as cssfile:
-...         res = cssfile.write("body {background: black}")
-... 
-...     run_web_server(
-...         config_static % tmp,
-...         request_page="http://localhost:7070/static/test.css")  
-body {background: black}
-
->>> aio.web.server.clear()
-  
 
 Routes
 ------
@@ -260,4 +223,42 @@ The config corresponds to the relevant web/*SERVER_NAME*/*ROUTE_NAME* section th
 </html>
   
 >>> aio.web.server.clear()
+
+
+
+Static directory
+----------------
+
+The web/*SERVER_NAME* section takes a static_url and a static_dir option for hosting static files
+
+>>> config_static = """
+... [aio]
+... log_level: ERROR
+... modules = aio.web.server  
+... 
+... [server/test]
+... factory: aio.web.server.factory
+... port: 7070
+... 
+... [web/test]
+... static_url: /static
+... static_dir: %s
+... """
+
+>>> import os
+>>> import tempfile
+
+Lets create a temporary directory and add a css file to it
+  
+>>> with tempfile.TemporaryDirectory() as tmp:
+...     with open(os.path.join(tmp, "test.css"), 'w') as cssfile:
+...         res = cssfile.write("body {background: black}")
+... 
+...     run_web_server(
+...         config_static % tmp,
+...         request_page="http://localhost:7070/static/test.css")  
+body {background: black}
+
+>>> aio.web.server.clear()
+  
 
