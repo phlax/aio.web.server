@@ -253,7 +253,7 @@ body {background: black}
 Template filters
 ----------------
 
-You can configure jinja filters by adding them to the web/*SERVER_NAME:filters option
+You can configure jinja filters by adding them to the web/*SERVER_NAME*:filters option
 
 >>> config = """
 ... [aio]
