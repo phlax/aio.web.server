@@ -164,4 +164,3 @@ def filestream(request, filepath):
                 resp.write(chunk)
                 chunk = f.read(limit)
     return resp
-
