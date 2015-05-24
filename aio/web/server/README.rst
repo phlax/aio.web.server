@@ -30,7 +30,7 @@ Lets create a basic web server configuration
 Now lets create a route and make it importable
  
 >>> import aiohttp
->>> import aio.web.server.tests
+>>> import aio.web.server
 
 >>> @aio.web.server.route
 ... def route_handler(request, config):
