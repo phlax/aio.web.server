@@ -5,21 +5,11 @@ aio.web.server usage
 Configuration
 -------------
 
-Let's create a config defining a factory method and using the aio.web.server.protocol for the protocol
-
-In the following configuration example a server named "example-1" is set up.
-
-Any sections that start with "web/example-1/" will be treated as route definitions.
-
-The route definition should provide a "match" and a "route" at a minimum.
-
-The route is given a name derived from the section name. In this case "homepage"
-
 To set up the web server, we need to:
 
 - add "aio.web.server" to aio:modules initialize the web server
-- add a server/SERVERNAME section to create the http server
-- add a web/SERVERNAME/ROUTENAME to create a route
+- add a "server/SERVERNAME" section to create the http server
+- add a "web/SERVERNAME/ROUTENAME" to create a route
 
 Lets create a basic web server configuration
   
