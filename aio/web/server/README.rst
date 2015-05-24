@@ -147,9 +147,10 @@ This will override the setting in aio:modules
 >>> config = """
 ... [aio]
 ... modules = aio.web.server
+...       aio.web.server.tests
 ... 
 ... [aio/web]
-... modules = aio.web.server.tests
+... modules = aio.web.server
 ... 
 ... [server/server_name]
 ... factory = aio.web.server.factory
@@ -157,7 +158,7 @@ This will override the setting in aio:modules
 ... """  
 
 >>> run_server_print_templates(config)
-['fragments/test_fragment.html', 'test_template.html']
+[]
 
 Or you can set the modules in the web/*SERVER_NAME*:modules option.
 
@@ -169,10 +170,10 @@ This will override the setting in both aio/web:modules and aio:modules
 ...          aio.web.server.tests
 ... 
 ... [aio/web]
-... modules = aio.web.server.tests
+... modules = aio.web.server
 ... 
 ... [web/server_name]
-... modules = aio.web.server
+... modules = aio.web.server.tests
 ... 
 ... [server/server_name]
 ... factory = aio.web.server.factory
@@ -180,7 +181,7 @@ This will override the setting in both aio/web:modules and aio:modules
 ... """  
 
 >>> run_server_print_templates(config)
-[]
+['fragments/test_fragment.html', 'test_template.html']
   
 
 Static directory
