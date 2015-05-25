@@ -17,7 +17,7 @@ log = logging.getLogger("aio.web")
 apps = {}
 
 
-@asyncio.coroutine
+@aio.app.server.protocol
 def protocol(name):
     if not aio.app.config:
         raise MissingConfiguration("No system configuration!")
@@ -56,7 +56,7 @@ def protocol(name):
     return http_protocol
 
 
-@asyncio.coroutine
+@aio.app.server.factory
 def factory(name, proto, address, port):
     return (
         yield from aio.http.server.factory(
@@ -76,8 +76,6 @@ def route(*la, **kwa):
     - if response object, then response object is returned
     - else if there is a template, then template is rendered with the context
     - else raises exception
-
-
     """
     app_key = kwa.get("app_key", aiohttp_jinja2.APP_KEY)
     encoding = kwa.get("encoding", 'utf-8')

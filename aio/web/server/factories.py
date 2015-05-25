@@ -65,7 +65,7 @@ def filters_factory(web_app, conf):
             filter_conf = aio.app.config["aio/web"]["filters"]
         except (TypeError, KeyError):
             return
-        
+
     filters = [
         x.strip() for x in
         filter_conf.split("\n")
