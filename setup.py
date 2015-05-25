@@ -44,7 +44,7 @@ except FileNotFoundError:
 setup(
     name='aio.web.server',
     version=version,
-    description="Aio web server",
+    description="Web server for the aio asyncio framework",
     long_description=long_description,
     classifiers=[
         "Development Status :: 4 - Beta",
