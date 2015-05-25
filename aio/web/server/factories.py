@@ -9,6 +9,7 @@ import jinja2
 
 from aio.core.exceptions import MissingConfiguration, BadConfiguration
 import aio.app
+import aio.web.server
 
 import logging
 log = logging.getLogger("aio.web")
@@ -121,22 +122,6 @@ def templates_factory(web_app, conf):
     yield from filters_factory(web_app, conf)
 
 
-
-class Route(object):
-
-    def __init__(self, request, config):
-        self._request = request
-        self._config = config
-
-    @property
-    def request(self):
-        return self._request
-
-    @property
-    def config(self):
-        return self._config
-
-    
 @asyncio.coroutine
 def routes_factory(web_app, conf):
     log.debug("Setting up routes for: %s" % web_app['name'])
@@ -165,12 +150,22 @@ def routes_factory(web_app, conf):
                     route_definitions))
         log.debug('adding route (%s): %s %s %s' % (
             name, method, match, handler))
-        
+
+        try:
+            route_check = aio.app.config["aio/web"]["route_check"]
+            route_check = resolve(route_check)
+        except (IndexError, KeyError):
+            route_check = None
+
+        if route_check:
+            route_check(handler)
+
         web_app.router.add_route(
             method,
             match,
             lambda request: handler(
-                Route(request, route_config)),
+                aio.web.server.Route(
+                    request, route_config)),
             name=name)
 
 

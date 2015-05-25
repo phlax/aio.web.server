@@ -11,6 +11,7 @@ from aio.web.server.testing import AioWebAppTestCase
 from aio.web.server import factories
 from aio.core.exceptions import BadConfiguration
 import aio.web.server.tests.test_factories
+import aio.web.server
 
 
 TEST_DIR = os.path.basename(
@@ -31,7 +32,7 @@ def example_filter():
     pass
 
 
-@asyncio.coroutine
+@aio.web.server.route
 def test_route():
     pass
 

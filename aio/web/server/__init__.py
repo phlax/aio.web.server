@@ -14,7 +14,31 @@ from aio.core.exceptions import MissingConfiguration
 
 import logging
 log = logging.getLogger("aio.web")
+
 apps = {}
+
+
+class Route(object):
+
+    def __init__(self, request, config):
+        self._request = request
+        self._config = config
+
+    @property
+    def request(self):
+        return self._request
+
+    @property
+    def config(self):
+        return self._config
+
+
+def route_checker(func):
+    if not func.__annotations__.get("decorator") == route:
+        dotted_func = "%s.%s" % (func.__module__, func.__name__)
+        raise RuntimeError(
+            "Route (%s) must be wrapped with " % dotted_func
+            + "@aio.web.server.route")
 
 
 @aio.app.server.protocol
@@ -124,6 +148,8 @@ def route(*la, **kwa):
                     template_name, e))
                 raise e
             return response
+        wrapped.__annotations__['decorator'] = route
+        wrapped.__annotations__['function'] = func
         return wrapped
     if len(la) == 1 and callable(la[0]):
         return wrapper(la[0])
