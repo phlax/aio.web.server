@@ -63,7 +63,7 @@ def filters_factory(web_app, conf):
     if not filter_conf:
         try:
             filter_conf = aio.app.config["aio/web"]["filters"]
-        except KeyError:
+        except (TypeError, KeyError):
             return
         
     filters = [

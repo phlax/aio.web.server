@@ -291,12 +291,11 @@ The filter is *not* called in a coroutine
 
 
 >>> run_server_check_filter(config)
-True
+example_filter is in the jinja environment!
 
 >>> aio.web.server.clear()
 
 You can also add filters to the the web/server_name section, this will override the setting in aio/web
-
 
 >>> config = """
 ... [aio]
@@ -313,7 +312,6 @@ You can also add filters to the the web/server_name section, this will override 
 ... [web/server_name]
 ... filters = example_filter_2 aio.web.server.tests._example_filter
 ... """
-example_filter is in the jinja environment!
 
 >>> @aio.testing.run_forever(sleep=1)
 ... def run_server_check_filter(config_string):
@@ -331,8 +329,10 @@ example_filter is in the jinja environment!
 ... 
 ...     return check_filter
 
->>> run_server_check_filter(config)
 
->>> aio.web.server.clear()
+>>> run_server_check_filter(config)
 example_filter is not in the jinja environment!
 example_filter_2 is in the jinja environment!
+
+
+>>> aio.web.server.clear()
