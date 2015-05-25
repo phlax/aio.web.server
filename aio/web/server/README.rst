@@ -33,7 +33,7 @@ Now lets create a route and make it importable
 >>> import aio.web.server
 
 >>> @aio.web.server.route
-... def route_handler(request, config):
+... def route_handler(route):
 ...     return aiohttp.web.Response(body=b"Hello, web world")    
 
 >>> aio.web.server.tests._example_handler = route_handler
@@ -51,7 +51,7 @@ Lets set up a test to run the server and request a web page
 ...         result = yield from (
 ...             yield from aiohttp.request(
 ...                "GET", request_page)).read()
-... 
+...         
 ...         print(result.decode())
 ... 
 ...     return call_web_server
@@ -190,20 +190,18 @@ Routes
 ... route = aio.web.server.tests._example_route_handler
 ... """
 
-While you can use any coroutine as a route handler, doing so would bypass logging and request/response handling.
+Route functions must be decorated with aio.server.route, and receive a aio.server.Route object
 
-Functions decorated with @aio.web.server.route receive 2 parameters, request and config
-
-The config corresponds to the relevant web/*SERVER_NAME*/*ROUTE_NAME* section that the route was created in
+The route object has a request property and a config property containing the routes configuration
 
 >>> @aio.web.server.route("test_template.html")  
-... def route_handler(request, config):
+... def route_handler(route):
 ...     return {
 ...         'message': 'Hello, world at %s from match(%s) handled by: %s' % (
-...             request.path, config['match'], config['route'])}
+...             route.request.path, route.config['match'], route.config['route'])}
 
 >>> aio.web.server.tests._example_route_handler = route_handler
-  
+
 >>> run_web_server(config_template)
 <html>
   <body>

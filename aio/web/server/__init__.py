@@ -91,14 +91,10 @@ def route(*la, **kwa):
         @asyncio.coroutine
         @functools.wraps(func)
         def wrapped(*la, **kwa):
-            request = la[0]
+            route = la[0]
+            request = route.request
             http_log = logging.getLogger("aio.http.request")
             http_log.info(request)
-            route_name = request.match_info.route.name
-            try:
-                handler_config = aio.app.config[route_name]
-            except KeyError:
-                handler_config = None
 
             if asyncio.iscoroutinefunction(func):
                 coro = func
@@ -106,8 +102,7 @@ def route(*la, **kwa):
                 coro = asyncio.coroutine(func)
 
             try:
-                context = yield from coro(
-                    *la, config=handler_config)
+                context = yield from coro(*la)
             except Exception as e:
                 import traceback
                 traceback.print_exc()

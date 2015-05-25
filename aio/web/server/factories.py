@@ -121,6 +121,22 @@ def templates_factory(web_app, conf):
     yield from filters_factory(web_app, conf)
 
 
+
+class Route(object):
+
+    def __init__(self, request, config):
+        self._request = request
+        self._config = config
+
+    @property
+    def request(self):
+        return self._request
+
+    @property
+    def config(self):
+        return self._config
+
+    
 @asyncio.coroutine
 def routes_factory(web_app, conf):
     log.debug("Setting up routes for: %s" % web_app['name'])
@@ -147,10 +163,15 @@ def routes_factory(web_app, conf):
             raise MissingConfiguration(
                 'Section %s should specify "route" for route' % (
                     route_definitions))
-
         log.debug('adding route (%s): %s %s %s' % (
             name, method, match, handler))
-        web_app.router.add_route(method, match, handler, name=name)
+        
+        web_app.router.add_route(
+            method,
+            match,
+            lambda request: handler(
+                Route(request, route_config)),
+            name=name)
 
 
 @asyncio.coroutine
