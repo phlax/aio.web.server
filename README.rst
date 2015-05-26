@@ -100,17 +100,16 @@ Route definitions are in defined in sections with the following format
 	  [web/SERVER_NAME/ROUTE_NAME]
 	  
 
-So an example server configuation with route a route define for the path / might be
+So an example server configuation with a route defined for the path / might be
 
 .. code:: ini
 	  
+	  [aio]
+	  modules = aio.web.server
+   
 	  [server/my_server]
 	  factory = aio.web.server.factory
 	  port = 8080
-
-	  [web/my_server]
-	  modules = ${aio:modules}
-	          some.web.module
 
 	  [web/my_server/my_route]
 	  match = /

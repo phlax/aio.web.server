@@ -160,12 +160,15 @@ def routes_factory(web_app, conf):
         if route_check:
             route_check(handler)
 
+        def route(handler, route_config, request):
+            return handler(
+                aio.web.server.Route(
+                    request, route_config))
+        import functools
         web_app.router.add_route(
             method,
             match,
-            lambda request: handler(
-                aio.web.server.Route(
-                    request, route_config)),
+            functools.partial(route, handler, route_config),
             name=name)
 
 
