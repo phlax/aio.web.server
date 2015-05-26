@@ -181,20 +181,23 @@ def sockets_factory(webapp, conf):
 
     @asyncio.coroutine
     def cb_sockets_emit(signal):
-        yield from aio.app.signals.emit('sockets-emitted', ['emit', signal.data])
+        yield from aio.app.signals.emit(
+            'sockets-emitted', ['emit', signal.data])
         for socket in webapp['sockets']:
             socket.send_str(json.dumps(signal.data))
 
     @asyncio.coroutine
     def cb_sockets_info(signal):
-        yield from aio.app.signals.emit('sockets-emitted', ['info', signal.data])
+        yield from aio.app.signals.emit(
+            'sockets-emitted', ['info', signal.data])
         for socket in webapp['sockets']:
             socket.send_str(
                 json.dumps({'info': signal.data}))
 
     @asyncio.coroutine
     def cb_sockets_error(signal):
-        yield from aio.app.signals.emit('sockets-emitted', ['error', signal.data])
+        yield from aio.app.signals.emit(
+            'sockets-emitted', ['error', signal.data])
         for socket in webapp['sockets']:
             socket.send_str(
                 json.dumps({'error': signal.data}))

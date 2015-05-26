@@ -47,7 +47,7 @@ Lets set up a test to run the server and request a web page
 
 >>> @aio.testing.run_forever(sleep=1)
 ... def run_web_server(config, request_page="http://localhost:7070"):
-...     yield from runner(['run'], config_string=config)
+...     runner(['run'], config_string=config)
 ... 
 ...     def call_web_server():
 ...         result = yield from (
@@ -114,7 +114,7 @@ Lets create a test to run the server and print the list of installed jinja templ
 
 >>> @aio.testing.run_forever(sleep=1)
 ... def run_server_print_templates(config_string):
-...     yield from runner(['run'], config_string=config_string)
+...     runner(['run'], config_string=config_string)
 ... 
 ...     def print_templates():
 ...         web_app = aio.web.server.apps['server_name']
@@ -278,7 +278,7 @@ The filter is *not* called in a coroutine
 
 >>> @aio.testing.run_forever(sleep=1)
 ... def run_server_check_filter(config_string):
-...     yield from runner(['run'], config_string=config_string)
+...     runner(['run'], config_string=config_string)
 ... 
 ...     def check_filter():
 ...         web_app = aio.web.server.apps['server_name']
@@ -315,7 +315,7 @@ You can also add filters to the the web/server_name section, this will override 
 
 >>> @aio.testing.run_forever(sleep=1)
 ... def run_server_check_filter(config_string):
-...     yield from runner(['run'], config_string=config_string)
+...     runner(['run'], config_string=config_string)
 ... 
 ...     def check_filter():
 ...         web_app = aio.web.server.apps['server_name']
